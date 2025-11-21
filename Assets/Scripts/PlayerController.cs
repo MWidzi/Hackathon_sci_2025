@@ -20,6 +20,7 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
+        this.gameObject.transform.rotation = GameManager.Instance.playerRotation;
         GameManager.Instance.playerRb.linearVelocity = moveValue * speed;
     }
 }

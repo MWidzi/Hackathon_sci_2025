@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
+
 
 public class GameManager : MonoBehaviour
 {
@@ -6,11 +8,14 @@ public class GameManager : MonoBehaviour
 
     public GameObject player;
     public Rigidbody2D playerRb;
+    public Quaternion playerRotation;
 
     public GameObject mainCam;
     public CameraController cameraController;
 
     public GameObject[] bulletPrefabs;
+
+    public InputAction holdAction;
 
     private void Awake()
     {
@@ -24,9 +29,11 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(this.gameObject);
     }
 
-    public void SpawnBullet(int prefabId, Vector2 bulletDirection, Transform parent)
+    public void SpawnBullet(int prefabId, Quaternion bulletDirection, Transform parent)
     {
-        GameObject note = Instantiate(bulletPrefabs[prefabId], parent);
+        GameObject bullet = Instantiate(GameManager.Instance.bulletPrefabs[prefabId]);
+        bullet.transform.position = parent.position;
+        bullet.GetComponent<BulletScript>().direction = bulletDirection;
     }
 
     void Start()
@@ -34,6 +41,7 @@ public class GameManager : MonoBehaviour
         playerRb = player.GetComponent<Rigidbody2D>();
 
         cameraController = mainCam.GetComponent<CameraController>();
+        holdAction = Utilities.EnableAction("Hold");
 
     }
 }

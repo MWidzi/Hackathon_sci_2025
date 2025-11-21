@@ -15,6 +15,8 @@ public class CameraController : MonoBehaviour
     public float maxDistance = 5f;
     public float offsetLimit = 0.2f;
 
+    private float playerAngle;
+
     void Start() { aimAction = Utilities.EnableAction("Aim"); }
 
     void Update()
@@ -26,6 +28,8 @@ public class CameraController : MonoBehaviour
 
         Vector3 playerPos = GameManager.Instance.player.transform.position;
         direction = mouseWorldPos - playerPos;
+        playerAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        GameManager.Instance.playerRotation = Quaternion.Euler(0, 0, playerAngle);
 
         offset = direction.normalized * direction.magnitude * offsetLimit;
 
