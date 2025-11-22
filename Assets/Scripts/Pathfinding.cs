@@ -11,7 +11,6 @@ public class Pathfinding : MonoBehaviour
 
     void Awake()
     {
-        
     }
 
     // EnemyController calls this manually.

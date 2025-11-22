@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using UnityEngine.Rendering.Universal;
 
 public class BulletScript : MonoBehaviour
 {
@@ -26,6 +27,9 @@ public class BulletScript : MonoBehaviour
 
     Coroutine stopSlowmo;
 
+    public AudioClip doorClip;
+    public AudioClip deathClip;
+
     private IEnumerator terminateSlowmo()
     {
         yield return new WaitForSeconds(1f);
@@ -49,7 +53,6 @@ public class BulletScript : MonoBehaviour
 
         rb.linearVelocity = rb.linearVelocity.normalized * bulletSpeed;
     }
-     
     void Update()
     {
         bool isHolding = GameManager.Instance.holdAction.IsPressed();
@@ -59,6 +62,7 @@ public class BulletScript : MonoBehaviour
         {
             GameManager.magnetizedBullet = this;
             Time.timeScale = Mathf.Lerp(Time.timeScale, 0.2f, 0.5f);
+            GameManager.Instance.volume.profile = GameManager.Instance.profile2;
             if (stopSlowmo != null)
             {
                 StopCoroutine(stopSlowmo);
@@ -78,23 +82,10 @@ public class BulletScript : MonoBehaviour
                 GetComponent<SpriteRenderer>().color = newColor;
                 GameManager.Instance.player.GetComponent<PlayerController>().catched = false;
             }
+            GameManager.Instance.volume.profile = GameManager.Instance.profile1;
             Time.timeScale = Mathf.Lerp(Time.timeScale, 1f, 0.1f);
             currentAttraction = Mathf.MoveTowards(currentAttraction, 0f, Time.deltaTime * releaseSpeed);
         }
-
-
-        //if (GameManager.Instance.holdAction.WasReleasedThisFrame() && isCaught)
-        //{
-        //    float rotationChange = Mathf.DeltaAngle(savedAngle, GameManager.Instance.player.transform.eulerAngles.z);
-        //    //float clampedRotationChange = Mathf.Clamp(rotationChange, -45f, 45f);
-        //    this.gameObject.transform.rotation = Quaternion.Euler(0, 0, GameManager.Instance.player.transform.eulerAngles.z + rotationChange) * Quaternion.Euler(0, 0, -90);
-
-        //    isCaught = false;
-        //    redirected = true;
-
-        //    GetComponent<SpriteRenderer>().color = newColor;
-        //    GameManager.Instance.player.GetComponent<PlayerController>().catched = false;
-        //}
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -104,6 +95,7 @@ public class BulletScript : MonoBehaviour
         if (collision.gameObject.layer == 3 && redirected)
         {
             collision.gameObject.SetActive(false);
+            SoundController.Instance.PlayAudio(doorClip);
         }
 
         if (collision.gameObject.layer == 7)
