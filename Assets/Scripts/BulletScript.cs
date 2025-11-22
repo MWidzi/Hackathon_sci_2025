@@ -8,6 +8,7 @@ public class BulletScript : MonoBehaviour
     public float spawnTime;
     public Vector2 moving;
     private bool isCaught = false;
+    public bool firedByPlayer = false;
 
     void Start()
     {
@@ -47,6 +48,7 @@ public class BulletScript : MonoBehaviour
                 this.gameObject.transform.rotation *= Quaternion.Euler(0, 0, 180);
 
             isCaught = false;
+            firedByPlayer = true;
         }
     }
 }
