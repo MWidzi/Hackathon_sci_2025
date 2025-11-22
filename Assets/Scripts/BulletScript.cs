@@ -3,7 +3,7 @@ using UnityEngine;
 public class BulletScript : MonoBehaviour
 {
     public Quaternion direction;
-    public float savedDirection;
+    public float savedAngle;
     public int bulletSpeed = 7;
     public float spawnTime;
     public Vector2 moving;
@@ -20,7 +20,7 @@ public class BulletScript : MonoBehaviour
         {
             moving = Vector2.zero;
             this.transform.parent = GameManager.Instance.player.transform;
-            savedDirection = GameManager.Instance.player.transform.rotation.z;
+            savedAngle = GameManager.Instance.player.transform.eulerAngles.z;
             isCaught = true;
             Time.timeScale = 0.2f;
         }
@@ -37,11 +37,16 @@ public class BulletScript : MonoBehaviour
     {
         if (GameManager.Instance.holdAction.WasReleasedThisDynamicUpdate() && isCaught)
         {
+            float delta = GameManager.Instance.player.transform.eulerAngles.z - savedAngle;
             this.gameObject.transform.parent = null;
-            this.gameObject.transform.rotation *= Quaternion.Euler(0, 0, 90);
+            if (Mathf.Sin(delta * Mathf.Deg2Rad) < 0)
+                this.gameObject.transform.rotation *= Quaternion.Euler(0, 0, 90);
+            else if (Mathf.Sin(delta * Mathf.Deg2Rad) > 0)
+                this.gameObject.transform.rotation *= Quaternion.Euler(0, 0, 270);
+            else
+                this.gameObject.transform.rotation *= Quaternion.Euler(0, 0, 180);
+
             isCaught = false;
         }
-
-
     }
 }
