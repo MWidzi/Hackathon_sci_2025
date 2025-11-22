@@ -8,6 +8,7 @@ public class BulletScript : MonoBehaviour
     public float spawnTime;
     public Vector2 moving;
     private bool isCaught = false;
+    private Vector3 initialOffset;
     public bool firedByPlayer = false;
 
     void Start()
@@ -20,15 +21,20 @@ public class BulletScript : MonoBehaviour
         if (GameManager.Instance.holdAction.IsPressed() && this.gameObject.GetComponent<Collider2D>().IsTouching(GameManager.Instance.player.transform.GetChild(0).gameObject.GetComponent<Collider2D>()) && !isCaught)
         {
             moving = Vector2.zero;
-            this.transform.parent = GameManager.Instance.player.transform;
             savedAngle = GameManager.Instance.player.transform.eulerAngles.z;
             isCaught = true;
             Time.timeScale = 0.2f;
+            initialOffset = GameManager.Instance.player.transform.InverseTransformPoint(transform.position);
         }
         else if (!isCaught)
         {
             moving = transform.right;
             Time.timeScale = 1f;
+        }
+
+        if (isCaught)
+        {
+            this.transform.position = GameManager.Instance.player.transform.TransformPoint(initialOffset);
         }
 
         this.gameObject.GetComponent<Rigidbody2D>().linearVelocity = moving * bulletSpeed;
@@ -38,14 +44,9 @@ public class BulletScript : MonoBehaviour
     {
         if (GameManager.Instance.holdAction.WasReleasedThisDynamicUpdate() && isCaught)
         {
-            float delta = GameManager.Instance.player.transform.eulerAngles.z - savedAngle;
-            this.gameObject.transform.parent = null;
-            if (Mathf.Sin(delta * Mathf.Deg2Rad) < 0)
-                this.gameObject.transform.rotation *= Quaternion.Euler(0, 0, 90);
-            else if (Mathf.Sin(delta * Mathf.Deg2Rad) > 0)
-                this.gameObject.transform.rotation *= Quaternion.Euler(0, 0, 270);
-            else
-                this.gameObject.transform.rotation *= Quaternion.Euler(0, 0, 180);
+            float rotationChange = Mathf.DeltaAngle(savedAngle, GameManager.Instance.player.transform.eulerAngles.z);
+            float clampedRotationChange = Mathf.Clamp(rotationChange, -45f, 45f);
+            this.gameObject.transform.rotation = Quaternion.Euler(0, 0, GameManager.Instance.player.transform.eulerAngles.z + clampedRotationChange);
 
             isCaught = false;
             firedByPlayer = true;
