@@ -38,7 +38,7 @@ public class BulletScript : MonoBehaviour
         if (GameManager.Instance.holdAction.WasReleasedThisDynamicUpdate() && isCaught)
         {
             this.gameObject.transform.parent = null;
-            this.gameObject.transform.rotation *= Quaternion.Euler(0, 0, 180);
+            this.gameObject.transform.rotation *= Quaternion.Euler(0, 0, 90);
             isCaught = false;
         }
 
