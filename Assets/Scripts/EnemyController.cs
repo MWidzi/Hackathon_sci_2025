@@ -13,7 +13,7 @@ public class EnemyController : MonoBehaviour
         {
             yield return new WaitForSeconds(1);
 
-            GameManager.Instance.SpawnBullet(0, rotation, this.gameObject.transform);
+            GameManager.Instance.SpawnBullet(0, direction, this.gameObject.transform);
         }
     }
 

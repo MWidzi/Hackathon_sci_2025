@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
+    public static BulletScript magnetizedBullet;
 
     public GameObject player;
     public Rigidbody2D playerRb;
@@ -29,11 +30,11 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(this.gameObject);
     }
 
-    public void SpawnBullet(int prefabId, Quaternion bulletDirection, Transform parent)
+    public void SpawnBullet(int prefabId, Vector2 bulletDirection, Transform parent)
     {
         GameObject bullet = Instantiate(GameManager.Instance.bulletPrefabs[prefabId]);
         bullet.transform.position = parent.position;
-        bullet.GetComponent<BulletScript>().direction = bulletDirection;
+        bullet.GetComponent<BulletScript>().moving = bulletDirection;
     }
 
     void Start()

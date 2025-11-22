@@ -44,5 +44,7 @@ public class PlayerController : MonoBehaviour
         if(isDashing){
             Dash();
         }
+
+        GameManager.Instance.playerRb.linearVelocity = moveValue * speed;
     }
 }

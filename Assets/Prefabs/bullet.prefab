@@ -105,8 +105,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43ead52c0d72d370f8dce0b7bdcc10b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BulletScript
-  direction: {x: 0, y: 0}
+  direction: {x: 0, y: 0, z: 0, w: 0}
+  savedAngle: 0
   bulletSpeed: 7
+  spawnTime: 0
+  moving: {x: 0, y: 0}
+  firedByPlayer: 0
+  activationRange: 5
+  maxAttraction: 15
+  chargeSpeed: 3
+  releaseSpeed: 10
 --- !u!58 &1897727650916459609
 CircleCollider2D:
   m_ObjectHideFlags: 0

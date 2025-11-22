@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class BulletScript : MonoBehaviour
 {
@@ -11,45 +12,65 @@ public class BulletScript : MonoBehaviour
     private Vector3 initialOffset;
     public bool firedByPlayer = false;
 
+    public float activationRange = 3f;
+    public float maxAttraction = 8f;
+    public float chargeSpeed = 3f;
+    public float releaseSpeed = 10f;
+
+    private Rigidbody2D rb;
+    private float currentAttraction = 0f;
+
+    Coroutine stopSlowmo;
+
+    private IEnumerator terminateSlowmo()
+    {
+        yield return new WaitForSeconds(1f);
+        Time.timeScale = Mathf.Lerp(Time.timeScale, 1f, 0.1f);
+        currentAttraction = Mathf.MoveTowards(currentAttraction, 0f, Time.deltaTime * releaseSpeed);
+    }
+
     void Start()
     {
-        this.gameObject.transform.rotation = direction;
+        rb = GetComponent<Rigidbody2D>();
+        rb.linearVelocity = moving * bulletSpeed;
     }
 
     void FixedUpdate()
     {
-        if (GameManager.Instance.holdAction.IsPressed() && this.gameObject.GetComponent<Collider2D>().IsTouching(GameManager.Instance.player.transform.GetChild(0).gameObject.GetComponent<Collider2D>()) && !isCaught)
+        if (currentAttraction > 0f)
         {
-            moving = Vector2.zero;
-            savedAngle = GameManager.Instance.player.transform.eulerAngles.z;
-            isCaught = true;
-            Time.timeScale = 0.2f;
-            initialOffset = GameManager.Instance.player.transform.InverseTransformPoint(transform.position);
-        }
-        else if (!isCaught)
-        {
-            moving = transform.right;
-            Time.timeScale = 1f;
+            Vector2 dir = (GameManager.Instance.mainCam.transform.position - transform.position).normalized;
+            rb.AddForce(dir * currentAttraction * 100f, ForceMode2D.Force);
         }
 
-        if (isCaught)
-        {
-            this.transform.position = GameManager.Instance.player.transform.TransformPoint(initialOffset);
-        }
-
-        this.gameObject.GetComponent<Rigidbody2D>().linearVelocity = moving * bulletSpeed;
+        rb.linearVelocity = rb.linearVelocity.normalized * bulletSpeed;
     }
 
     void Update()
     {
-        if (GameManager.Instance.holdAction.WasReleasedThisDynamicUpdate() && isCaught)
-        {
-            float rotationChange = Mathf.DeltaAngle(savedAngle, GameManager.Instance.player.transform.eulerAngles.z);
-            float clampedRotationChange = Mathf.Clamp(rotationChange, -45f, 45f);
-            this.gameObject.transform.rotation = Quaternion.Euler(0, 0, GameManager.Instance.player.transform.eulerAngles.z + clampedRotationChange);
+        bool isHolding = GameManager.Instance.holdAction.IsPressed();
+        float distance = Vector2.Distance(transform.position, GameManager.Instance.mainCam.transform.position);
 
-            isCaught = false;
-            firedByPlayer = true;
+        if (distance < activationRange && isHolding && (GameManager.magnetizedBullet == null || GameManager.magnetizedBullet == this))
+        {
+            GameManager.magnetizedBullet = this;
+            Time.timeScale = Mathf.Lerp(Time.timeScale, 0.2f, 0.5f);
+            if (stopSlowmo != null)
+            {
+                StopCoroutine(stopSlowmo);
+            }
+            stopSlowmo = StartCoroutine(terminateSlowmo());
+            currentAttraction += chargeSpeed * Time.deltaTime;
+            currentAttraction = Mathf.Clamp(currentAttraction, 0f, maxAttraction);
+        }
+        else
+        {
+            if (GameManager.magnetizedBullet == this)
+            {
+                GameManager.magnetizedBullet = null;
+            }
+            Time.timeScale = Mathf.Lerp(Time.timeScale, 1f, 0.1f);
+            currentAttraction = Mathf.MoveTowards(currentAttraction, 0f, Time.deltaTime * releaseSpeed);
         }
     }
 }
